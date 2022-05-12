@@ -90,10 +90,15 @@ local function worker(user_args)
         local charge = 0
         local status
         for s in stdout:gmatch("[^\r\n]+") do
-            local cur_status, charge_str, _ = string.match(s, '.+: ([%a%s]+), (%d?%d?%d)%%,?(.*)')
+            local cur_status, charge_str, _ = string.match(s, '.+: (%a+ ?%a*), (%d?%d?%d)%%,?(.*)')
             if cur_status ~= nil and charge_str ~=nil then
                 local cur_charge = tonumber(charge_str)
                 if cur_charge > charge then
+                    -- In this case, we're probably plugged in, so it's close enough to charging
+                    -- for me
+                    if cur_status == "Not charging" then
+                        cur_status = "Charging"
+                    end
                     status = cur_status
                     charge = cur_charge
                 end
