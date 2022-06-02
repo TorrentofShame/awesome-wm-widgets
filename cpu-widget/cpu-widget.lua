@@ -14,6 +14,8 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local gears = require("gears")
 
+local TMP_CMD = [[sh -c "sensors -fj | jq '.[\"coretemp-isa-0000\"][\"Package id 0\"].temp1_input'"]]
+
 local CMD = [[sh -c "grep '^cpu.' /proc/stat; ps -eo '%p|%c|%C|' -o "%mem" -o '|%a' --sort=-%cpu ]]
     .. [[| head -11 | tail -n +2"]]
 
@@ -214,10 +216,16 @@ local function worker(user_args)
                     cpus[i]['total_prev'] = total
                     cpus[i]['idle_prev'] = idle
 
+                    local cpu_tmp = nil
+                    if i == 0 then
+                        cpu_tmp = nil -- TODO
+                    end
+
                     local row = wibox.widget
                     {
                         create_textbox{text = name},
                         create_textbox{text = math.floor(diff_usage) .. '%'},
+                        cpu_tmp,
                         {
                             max_value = 100,
                             value = diff_usage,
