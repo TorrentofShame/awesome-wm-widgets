@@ -55,6 +55,7 @@ local function worker(user_args)
     local onlock = args.onlock or function() awful.spawn.with_shell("light-locker-command -l") end
     local onreboot = args.onreboot or function() awful.spawn.with_shell("sudo /bin/reboot now") end
     local onsuspend = args.onsuspend or function() awful.spawn.with_shell("sudo /bin/zzz") end
+    local onhibernate = args.onhibernate or function() awful.spawn.with_shell("sudo /bin/ZZZ") end
     local onpoweroff = args.onpoweroff or function() awful.spawn.with_shell("sudo /bin/poweroff now") end
 
     local menu_items = {
@@ -62,6 +63,7 @@ local function worker(user_args)
         { name = 'Lock', icon_name = 'lock.svg', command = onlock },
         { name = 'Reboot', icon_name = 'refresh-cw.svg', command = onreboot },
         { name = 'Suspend', icon_name = 'moon.svg', command = onsuspend },
+        { name = 'Hibernate', icon_name = 'moon.svg', command = onhibernate },
         { name = 'Power off', icon_name = 'power.svg', command = onpoweroff },
     }
 
