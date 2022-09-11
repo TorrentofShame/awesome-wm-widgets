@@ -40,7 +40,7 @@ local function worker(user_args)
             border = '#261447'
         },
         dark = {
-            bg = '#000000',
+            bg = '#222222', --'#000000',
             fg = '#ffffff',
             focus_date_bg = '#ffffff',
             focus_date_fg = '#000000',
