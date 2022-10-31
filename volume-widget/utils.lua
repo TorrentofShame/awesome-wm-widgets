@@ -16,6 +16,8 @@ end
 function utils.extract_sinks_and_sources(pacmd_output)
     local sinks = {}
     local sources = {}
+    local default_sink
+    local default_source
     local device
     local properties
     local ports
@@ -34,12 +36,21 @@ function utils.extract_sinks_and_sources(pacmd_output)
             in_source = false
         end
 
-        if string.match(line, 'index:') then
+        if string.match(line, 'default:') then
+            if in_sink then
+                default_sink = line:match(': (.+)')
+            else
+                default_source = line:match(': (.+)')
+            end
+        end
+
+        if string.match(line, 'Sink #') or string.match(line, 'Source #') then
             in_device = true
             in_properties = false
             device = {
-                id = line:match(': (%d+)'),
-                is_default = string.match(line, '*') ~= nil
+                id = line:match('#(%d+)'),
+                is_default = false
+                --is_default = string.match(line, '*') ~= nil
             }
             if in_sink then
                 table.insert(sinks, device)
@@ -48,14 +59,14 @@ function utils.extract_sinks_and_sources(pacmd_output)
             end
         end
 
-        if string.match(line, '^\tproperties:') then
+        if string.match(line, '^\tProperties:') then
             in_device = false
             in_properties = true
             properties = {}
             device['properties'] = properties
         end
 
-        if string.match(line, 'ports:') then
+        if string.match(line, 'Ports:') then
             in_device = false
             in_properties = false
             in_ports = true
@@ -63,7 +74,7 @@ function utils.extract_sinks_and_sources(pacmd_output)
             device['ports'] = ports
         end
 
-        if string.match(line, 'active port:') then
+        if string.match(line, 'Active Port:') then
             in_device = false
             in_properties = false
             in_ports = false
@@ -75,6 +86,14 @@ function utils.extract_sinks_and_sources(pacmd_output)
             local key = t[1]:gsub('\t+', ''):lower()
             local value = t[2]:gsub('^<', ''):gsub('>$', '')
             device[key] = value
+
+            -- check for defaults when name is set
+            if key == 'name' then
+                local default_cmp = in_sink and default_sink or default_source
+                if value == default_cmp then
+                    device.is_default = true
+                end
+            end
         end
 
         if in_properties then

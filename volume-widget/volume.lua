@@ -16,7 +16,7 @@ local watch = require("awful.widget.watch")
 local utils = require("awesome-wm-widgets.volume-widget.utils")
 
 
-local LIST_DEVICES_CMD = [[sh -c "pacmd list-sinks; pacmd list-sources"]]
+local LIST_DEVICES_CMD = [[sh -c "echo 'source(s) available.'; echo \"default: $(pactl get-default-source)\"; pactl list sources; echo 'sink(s) available.'; echo \"default: $(pactl get-default-sink)\"; pactl list sinks"]]
 local function GET_VOLUME_CMD(device) return 'amixer -D ' .. device .. ' sget Master' end
 local function INC_VOLUME_CMD(device, step) return 'amixer -D ' .. device .. ' sset Master ' .. step .. '%+' end
 local function DEC_VOLUME_CMD(device, step) return 'amixer -D ' .. device .. ' sset Master ' .. step .. '%-' end
@@ -70,7 +70,7 @@ local function build_rows(devices, on_checkbox_click, device_type)
         }
 
         checkbox:connect_signal("button::press", function()
-            spawn.easy_async(string.format([[sh -c 'pacmd set-default-%s "%s"']], device_type, device.name), function()
+            spawn.easy_async(string.format([[sh -c 'pactl set-default-%s "%s"']], device_type, device.name), function()
                 on_checkbox_click()
             end)
         end)
@@ -119,7 +119,7 @@ local function build_rows(devices, on_checkbox_click, device_type)
         end)
 
         row:connect_signal("button::press", function()
-            spawn.easy_async(string.format([[sh -c 'pacmd set-default-%s "%s"']], device_type, device.name), function()
+            spawn.easy_async(string.format([[sh -c 'pactl set-default-%s "%s"']], device_type, device.name), function()
                 on_checkbox_click()
             end)
         end)
