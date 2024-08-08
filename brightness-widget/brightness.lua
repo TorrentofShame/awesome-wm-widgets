@@ -45,6 +45,7 @@ local function worker(user_args)
     local current_level = 0 -- current brightness value
     local tooltip = args.tooltip or false
     local percentage = args.percentage or false
+    local displayIdx = args.displayIdx or 1
     if program == 'light' then
         get_brightness_cmd = 'light -G'
         set_brightness_cmd = 'light -S %d' -- <level>
@@ -60,6 +61,12 @@ local function worker(user_args)
         set_brightness_cmd = 'brightnessctl set %d%%' -- <level>
         inc_brightness_cmd = 'brightnessctl set +' .. step .. '%'
         dec_brightness_cmd = 'brightnessctl set ' .. step .. '-%'
+    elseif program == 'ddcutil' then
+        local pre_cmd = 'ddcutil -d ' .. displayIdx
+        get_brightness_cmd = 'bash -c "'..pre_cmd..[[ getvcp 10 | awk '{ print substr(\$9,1,length(\$9)-1) }'"]]
+        set_brightness_cmd = pre_cmd..' setvcp 10 %d'
+        inc_brightness_cmd = pre_cmd..' setvcp 10 + ' .. step
+        dec_brightness_cmd = pre_cmd..' setvcp 10 - ' .. step
     else
         show_warning(program .. " command is not supported by the widget")
         return
